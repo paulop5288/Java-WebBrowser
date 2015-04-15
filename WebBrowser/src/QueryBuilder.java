@@ -4,8 +4,12 @@ import java.util.HashSet;
 import javax.swing.Spring;
 
 public class QueryBuilder {
+	
 	public static Query parse(String query) {
-		
+		if (!checkRegularForm(query)) {
+			System.err.println("Query is not corrected.");
+			return null;
+		}
 		if (!query.contains("(") && !query.contains(")")) {
 			return new AtomicQuery(query);
 		}
@@ -65,24 +69,40 @@ public class QueryBuilder {
 		return new AtomicQuery(query);
 	}
 	
+	// check regular format
 	public static boolean checkRegularForm(String query) {
-		
-		
+		if (countOccurrences(query, '(') != countOccurrences(query, ')')) {
+			return false;
+		}
 		return true;
 	}
 	
-	private int countOccurrences(String string, char character) {
-		if (string == null) {
+	// check infix format
+	public static boolean checkInfixForm(String query) {
+		if (query.contains("(") || query.contains(")")) {
+			return false;
+		}
+		return true;
+	}
+	
+	public static int countOccurrences(String haystack, char character) {
+		if (haystack == null) {
 			return 0;
 		}
-		
-		return 0;
+		int count = 0;
+		for (int i = 0; i < haystack.length(); i++) {
+			if (haystack.charAt(i) == character) {
+				++count;
+			}
+		}
+		return count;
 	}
 
 
 	public static void main(String[] args) {
 		long startTime = System.nanoTime();
 		String a = "and(western,and(country,fghjk,dfghj),or(fghj,ffsdghj,and(fghjk)))";
+		System.out.println(countOccurrences(a, ')'));
 		Query myQuery = QueryBuilder.parse(a);
 		System.out.println(myQuery);
 		long endTime = System.nanoTime();
