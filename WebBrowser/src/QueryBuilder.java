@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class QueryBuilder {
 	public static Query parse(String query) {
@@ -12,7 +13,7 @@ public class QueryBuilder {
 		}
 		
 		if (query.startsWith("and")) {
-			ArrayList<Query> andQuerys = new ArrayList<>();
+			HashSet<Query> andQuerys = new HashSet<>();
 			query = query.replaceFirst("and", "").trim();
 			query = query.substring(1, query.length() - 1);
 			String[] queryStrings = QueryBuilder.split(query);
@@ -23,7 +24,7 @@ public class QueryBuilder {
 		}
 		
 		if (query.startsWith("or")) {
-			ArrayList<Query> orQuerys = new ArrayList<>();
+			HashSet<Query> orQuerys = new HashSet<>();
 			query = query.replaceFirst("or", "").trim();
 			query = query.substring(1, query.length() - 1);
 			String[] queryStrings = QueryBuilder.split(query);
@@ -59,13 +60,15 @@ public class QueryBuilder {
 	}
 	
 	public static void main(String[] args) {
-//		String a = "and(western,and(country,fghjk,dfghj),or(fghj,ffsdghj,and(fghjk)))";
-//		Query myQuery = QueryBuilder.parse(a);
-//		System.out.println(myQuery);
-		String a = "hello";
-		String b = "hello";
-		if (a == b) {
-			System.out.println("same");
-		}
+		long startTime = System.nanoTime();
+		String a = "and(western,and(country,fghjk,dfghj),or(fghj,ffsdghj,and(fghjk)))";
+		Query myQuery = QueryBuilder.parse(a);
+		System.out.println(myQuery);
+		long endTime = System.nanoTime();
+		
+		long durantion = (endTime - startTime);
+		System.out.println("execution time is " + durantion / 1000000.0 + "ms");
+		
+
 	}
 }

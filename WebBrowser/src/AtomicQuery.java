@@ -16,7 +16,7 @@ public class AtomicQuery implements Query {
 	
 	@Override
 	public String toString() {
-		return "SimpleQuery : " + queryString;
+		return "AtomicQuery : " + queryString;
 	}
 
 

@@ -1,11 +1,12 @@
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 
 public class AndQuery implements Query {
-	private List<Query> querys;
-	public AndQuery(List<Query> querys) {
+	private Set<Query> querys;
+	public AndQuery(Set<Query> querys) {
 		this.querys = querys;
 	}
 
