@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import javax.swing.Spring;
+
 public class QueryBuilder {
 	public static Query parse(String query) {
 		
@@ -59,6 +61,25 @@ public class QueryBuilder {
 		return queryStrings.toArray(new String[queryStrings.size()]);
 	}
 	
+	public static Query parseInfixForm(String query) {
+		return new AtomicQuery(query);
+	}
+	
+	public static boolean checkRegularForm(String query) {
+		
+		
+		return true;
+	}
+	
+	private int countOccurrences(String string, char character) {
+		if (string == null) {
+			return 0;
+		}
+		
+		return 0;
+	}
+
+
 	public static void main(String[] args) {
 		long startTime = System.nanoTime();
 		String a = "and(western,and(country,fghjk,dfghj),or(fghj,ffsdghj,and(fghjk)))";
@@ -68,7 +89,6 @@ public class QueryBuilder {
 		
 		long durantion = (endTime - startTime);
 		System.out.println("execution time is " + durantion / 1000000.0 + "ms");
-		
 
 	}
 }
