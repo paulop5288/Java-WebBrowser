@@ -1,10 +1,11 @@
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
 public class OrQuery implements Query {
-	private Set<Query> querys;
-	public OrQuery(Set<Query> querys) {
+	private List<Query> querys;
+	public OrQuery(List<Query> querys) {
 		this.querys = querys;
 	}
 
