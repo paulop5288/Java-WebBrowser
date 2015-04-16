@@ -19,5 +19,8 @@ public class AtomicQuery implements Query {
 		return "AtomicQuery : " + queryString;
 	}
 
+	public String getQueryString() {
+		return queryString;
+	}
 
 }
