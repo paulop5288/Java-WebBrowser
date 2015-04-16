@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.IllegalFormatCodePointException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,7 +11,6 @@ public class QueryBuilder {
 		// modify query 
 		query = query.trim().toLowerCase();
 		if (!checkRegularForm(query)) {
-			System.err.println("Query is not corrected.");
 			throw new BadQueryFormatException();
 		}
 		
@@ -27,8 +27,12 @@ public class QueryBuilder {
 		if (query.startsWith("not")) {			
 			query = query.substring(query.indexOf("(") + 1, query.lastIndexOf(")")).trim();
 			if (checkRegularCharacter(query)) {
-				return new NotQuery(query);
+				return new NotQuery(new AtomicQuery(query));
 			}
+			if (query.startsWith("not")) {
+				return new NotQuery(QueryBuilder.parse(query));
+			}
+			
 			throw new BadQueryFormatException();
 		}
 		
@@ -80,7 +84,28 @@ public class QueryBuilder {
 		return queryStrings.toArray(new String[queryStrings.size()]);
 	}
 	
-	public static Query parseInfixForm(String query) {
+	public static Query parseInfixForm(String query) throws BadQueryFormatException {
+		if (!checkInfixForm(query)) {
+			throw new BadQueryFormatException();
+		}
+		if (query.contains(" and ")) {
+			String[] queryComponents = query.split(" and ");
+			ArrayList<Query> querys = new ArrayList<>();
+			for (String queryString : queryComponents) {
+				querys.add(parseInfixForm(queryString));
+			}
+			return new AndQuery(querys);
+		}
+		if (query.contains(" or ")) {
+			// do something
+		}
+		if (query.contains("not ")) {
+			query = query.substring(4);
+			return new NotQuery(QueryBuilder.parseInfixForm(query));
+		}
+		if (!checkRegularCharacter(query)) {
+			throw new BadQueryFormatException();
+		}
 		return new AtomicQuery(query);
 	}
 	
@@ -90,19 +115,19 @@ public class QueryBuilder {
 			return false;
 		}
 		if (!query.contains("(") || !query.contains(")")) {
-			checkRegularCharacter(query);
+			return checkRegularCharacter(query);
 		}
 		return true;
 	}
 	
 	// check if a query contains regular characters only
-	public static boolean checkRegularCharacter(String query) throws BadQueryFormatException {
+	public static boolean checkRegularCharacter(String query) {
 		// use regex to check
 		Pattern pattern = Pattern.compile("[\\W]");
 		Matcher matcher = pattern.matcher(query);
 		if (matcher.find()) {
-			System.err.println(query + " is a wrong query.");
-			throw new BadQueryFormatException();
+			//System.err.println(query + " is a wrong query.");
+			return false;
 		}
 		return true;
 	}
@@ -110,6 +135,17 @@ public class QueryBuilder {
 	// check infix format
 	public static boolean checkInfixForm(String query) {
 		if (query.contains("(") || query.contains(")")) {
+			return false;
+		}
+		if (query.contains(" or ") && query.contains(" and ")) {
+			return false;
+		}
+
+
+		// check if the query contains word and space only
+		Pattern pattern = Pattern.compile("[^a-zA-Z\\s]");
+		Matcher matcher = pattern.matcher(query);
+		if (matcher.find()) {	
 			return false;
 		}
 		return true;
@@ -128,15 +164,21 @@ public class QueryBuilder {
 		return count;
 	}
 
-
 	public static void main(String[] args) {
 		long startTime = System.nanoTime();
-		String a = " and ( a , b )";
+		String a = "sex and drugs and rock and roll";
+
+//		try {
+//			Query myQuery = QueryBuilder.parse(a);
+//			System.out.println(myQuery);
+//		} catch (Exception e) {
+//			System.out.println(e);
+//		}
 
 		try {
-			Query myQuery = QueryBuilder.parse(a);
-			System.out.println(myQuery);
+			QueryBuilder.parseInfixForm(a);
 		} catch (Exception e) {
+			// TODO: handle exception
 			System.out.println(e);
 		}
 
