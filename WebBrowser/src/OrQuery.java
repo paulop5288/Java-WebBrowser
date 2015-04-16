@@ -1,6 +1,4 @@
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -24,19 +22,4 @@ public class OrQuery implements Query {
 		return "OrQuery : " + querys.toString();
 	}
 	
-	public static void main(String[] args) {
-		String[] all = {"111 ", "222 ", "333 ", "444 ", "555 "};
-		Set<String> sentence = new HashSet<>();
-		Set<String> s2 = new HashSet<>();
-		sentence.add(all[0]);
-		sentence.add(all[1]);
-		sentence.add(all[2]);
-		s2.add(all[2]);
-		s2.add(all[3]);
-		s2.add(all[4]);
-		sentence.addAll(s2);
-		for (String string : sentence) {
-			System.out.println(string);
-		}
-	}
 }

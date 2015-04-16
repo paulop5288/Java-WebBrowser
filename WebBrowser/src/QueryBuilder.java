@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import javax.swing.Spring;
 
 public class QueryBuilder {
 	
@@ -109,6 +108,7 @@ public class QueryBuilder {
 		
 		long durantion = (endTime - startTime);
 		System.out.println("execution time is " + durantion / 1000000.0 + "ms");
+
 
 	}
 }
