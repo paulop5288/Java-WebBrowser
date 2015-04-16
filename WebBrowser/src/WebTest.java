@@ -1,10 +1,11 @@
+import java.util.ArrayList;
 import java.util.Set;
 
 
 public class WebTest {
 
 	public static void
-	main(String argv[]) {
+	main(String args[]) {
 		//bit of a cheat in here in that we create our own webdocs without parsing them.
 		//important part is that for assignment 2 you need a working web index, and this was
 		//the quickest way for me to supply one.
@@ -13,7 +14,7 @@ public class WebTest {
 										        new String[]{"this", "is", "the", "age", "on", "the", "train"},
 										        new String[]{"travel", "trains"});
 		WebDoc document2 = WebDoc.getTestWebDoc("http://www.shef.ac.uk/buses.html",
-												new String[]{"the", "wheels", "on", "the", "bus", "go", "round"},
+												new String[]{"tbhe", "wheels", "on", "the", "bus", "go", "round"},
 												new String[]{"travel", "bus"});
 		WebDoc document3 = WebDoc.getTestWebDoc("http://www.shef.ac.uk/planes.html",
 		        								new String[]{"planes", "are", "new", "and", "fly", "high", "up"},
@@ -26,20 +27,48 @@ public class WebTest {
 		        								new String[]{"bikes", "travel"});
 		WebDoc[] docs = new WebDoc[] {document1, document2, document3, document4, document5};
 		
+		CommandReader commandReader = new CommandReader();
+		ArrayList<String> queryStrings = commandReader.readFileArgs(args[0]);
+		ArrayList<Query> querys = new ArrayList<>();
 		
-		WebIndex content = new WebIndex(WebIndexType.CONTENT);
-		WebIndex keywords = new WebIndex(WebIndexType.KEYWORDS);
-		
-		for (WebDoc doc: docs) {
-			System.out.println(doc.toString());
-			content.add(doc);
-			keywords.add(doc);
+		for (String queryString : queryStrings) {
+			try {
+				querys.add(QueryBuilder.parse(queryString));
+			} catch (Exception e) {
+				
+			}
 		}
-		System.out.println(content.toString());
-		System.out.println(keywords.toString());
+		for (Query query : querys) {
+			System.out.println("Query : " + query);
+		}
 		
-		runMatches(keywords, "travel");
-		runMatches(content, "are");
+		System.out.println("----------------------------------\n");
+		WebIndex content = new WebIndex(WebIndexType.CONTENT);
+		for (WebDoc doc: docs) {
+			content.add(doc);
+		}
+		Query firstQuery = querys.get(querys.size() - 1);
+		Query secondQuery = querys.get(querys.size() - 2);
+		System.out.println(secondQuery);
+		Set<WebDoc> matchedDocs = secondQuery.matches(content);
+		for (WebDoc webDoc : matchedDocs) {
+			System.out.println(webDoc);
+		}
+		
+		System.out.println("\n"+firstQuery);
+		matchedDocs = firstQuery.matches(content);
+		for (WebDoc webDoc : matchedDocs) {
+			System.out.println(webDoc);
+		}
+		
+//		WebIndex keywords = new WebIndex(WebIndexType.KEYWORDS);
+//		
+//		
+//		System.out.println(content.toString());
+//		System.out.println(keywords.toString());
+//		
+//		runMatches(keywords, "travel");
+//		runMatches(content, "are");
 	}
 
 	public static void

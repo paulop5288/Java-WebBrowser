@@ -1,24 +1,40 @@
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class QueryBuilder {
 	
-	public static Query parse(String query) {
+	public static Query parse(String query) throws BadQueryFormatException {
+		// modify query 
+		query = query.trim().toLowerCase();
 		if (!checkRegularForm(query)) {
 			System.err.println("Query is not corrected.");
-			return null;
+			throw new BadQueryFormatException();
 		}
+		
+		// start parsing
+		// atomic query
 		if (!query.contains("(") && !query.contains(")")) {
-			return new AtomicQuery(query);
+			if (checkRegularCharacter(query)) {
+				return new AtomicQuery(query);
+			}
+			throw new BadQueryFormatException();
 		}
 		
-		if (query.startsWith("not")) {
-			return new NotQuery(query.substring(3));
+		// not query
+		if (query.startsWith("not")) {			
+			query = query.substring(query.indexOf("(") + 1, query.lastIndexOf(")")).trim();
+			if (checkRegularCharacter(query)) {
+				return new NotQuery(query);
+			}
+			throw new BadQueryFormatException();
 		}
 		
+		// and query
 		if (query.startsWith("and")) {
-			HashSet<Query> andQuerys = new HashSet<>();
+			ArrayList<Query> andQuerys = new ArrayList<>();
 			query = query.replaceFirst("and", "").trim();
 			query = query.substring(1, query.length() - 1);
 			String[] queryStrings = QueryBuilder.split(query);
@@ -28,8 +44,9 @@ public class QueryBuilder {
 			return new AndQuery(andQuerys);
 		}
 		
+		// or query
 		if (query.startsWith("or")) {
-			HashSet<Query> orQuerys = new HashSet<>();
+			ArrayList<Query> orQuerys = new ArrayList<>();
 			query = query.replaceFirst("or", "").trim();
 			query = query.substring(1, query.length() - 1);
 			String[] queryStrings = QueryBuilder.split(query);
@@ -38,8 +55,7 @@ public class QueryBuilder {
 			}
 			return new OrQuery(orQuerys);
 		}
-
-		return null;
+		throw new BadQueryFormatException();
 	}
 	
 	public static String[] split(String query) {
@@ -69,9 +85,24 @@ public class QueryBuilder {
 	}
 	
 	// check regular format
-	public static boolean checkRegularForm(String query) {
+	public static boolean checkRegularForm(String query) throws BadQueryFormatException{
 		if (countOccurrences(query, '(') != countOccurrences(query, ')')) {
 			return false;
+		}
+		if (!query.contains("(") || !query.contains(")")) {
+			checkRegularCharacter(query);
+		}
+		return true;
+	}
+	
+	// check if a query contains regular characters only
+	public static boolean checkRegularCharacter(String query) throws BadQueryFormatException {
+		// use regex to check
+		Pattern pattern = Pattern.compile("[\\W]");
+		Matcher matcher = pattern.matcher(query);
+		if (matcher.find()) {
+			System.err.println(query + " is a wrong query.");
+			throw new BadQueryFormatException();
 		}
 		return true;
 	}
@@ -100,10 +131,15 @@ public class QueryBuilder {
 
 	public static void main(String[] args) {
 		long startTime = System.nanoTime();
-		String a = "and(western,and(country,fghjk,dfghj),or(fghj,ffsdghj,and(fghjk)))";
-		System.out.println(countOccurrences(a, ')'));
-		Query myQuery = QueryBuilder.parse(a);
-		System.out.println(myQuery);
+		String a = " and ( a , b )";
+
+		try {
+			Query myQuery = QueryBuilder.parse(a);
+			System.out.println(myQuery);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
 		long endTime = System.nanoTime();
 		
 		long durantion = (endTime - startTime);
