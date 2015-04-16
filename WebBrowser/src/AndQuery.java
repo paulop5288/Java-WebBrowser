@@ -1,6 +1,4 @@
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -12,23 +10,39 @@ public class AndQuery implements Query {
 
 	@Override
 	public Set<WebDoc> matches(WebIndex wind) {
-		Set<WebDoc> allWebDocs = new HashSet<>();
+		if (querys.size() < 2) {
+			return new HashSet<>();
+		}
+		
+		boolean startMatch = false;
+		Set<WebDoc> lastWebDocs = null;
 		Set<WebDoc> matchedWebDocs = new HashSet<>();
+
 		for (Query query : querys) {
-			Set<WebDoc> tmpWebDocs = query.matches(wind);
-			for (WebDoc webDoc : tmpWebDocs) {
-				if (allWebDocs.contains(webDoc)) {
-					matchedWebDocs.add(webDoc);
-				}
+			if (!startMatch) {
+				lastWebDocs = query.matches(wind);
+				startMatch = true;
+				continue;
 			}
-			allWebDocs.addAll(tmpWebDocs);
+			Set<WebDoc> currentWebDocs = query.matches(wind);
+			matchedWebDocs = andMatch(lastWebDocs, currentWebDocs);
+			lastWebDocs = currentWebDocs;
 		}
 		return matchedWebDocs;
 	}
 	
+	private Set<WebDoc> andMatch(Set<WebDoc> firstDocs, Set<WebDoc> secondDocs) {
+		Set<WebDoc> tempSet = new HashSet<>();
+		for (WebDoc webDoc : firstDocs) {
+			if (secondDocs.contains(webDoc)) {
+				tempSet.add(webDoc);
+			}
+		}
+		return tempSet;
+	}
+	
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return "AndQuery : " + querys.toString();
 	}
 
