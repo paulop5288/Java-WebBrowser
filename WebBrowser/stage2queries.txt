@@ -7,7 +7,7 @@ sex and drugs and rock and roll
 sex and (drugs and not rock) and roll
 sex and (drugs and not rock) and roll and sex and (drugs and not rock) and roll and sex and (drugs and not rock) and roll and sex and (drugs and not rock) and roll and sex and (drugs and not rock) and roll and sex and (drugs and not rock) and roll and sex and (drugs and not rock) and roll
 not not this
-not(not(not(not(not(not(not(that)))))))))
+not(not(not(not(not(not(not(that)))))))
 AND(a,b)
 and ( a , b )
 and(and,or)

@@ -33,14 +33,14 @@ public class WebTest {
 		
 		for (String queryString : queryStrings) {
 			try {
-				querys.add(QueryBuilder.parse(queryString));
+				Query query = QueryBuilder.parseInfixForm(queryString);
+				querys.add(query);
+				System.out.println(query);
 			} catch (Exception e) {
-				
+				System.err.println("Query is not corrected.");
 			}
 		}
-		for (Query query : querys) {
-			System.out.println("Query : " + query);
-		}
+		
 		
 		System.out.println("----------------------------------\n");
 		WebIndex content = new WebIndex(WebIndexType.CONTENT);
@@ -60,15 +60,7 @@ public class WebTest {
 		for (WebDoc webDoc : matchedDocs) {
 			System.out.println(webDoc);
 		}
-		
-//		WebIndex keywords = new WebIndex(WebIndexType.KEYWORDS);
-//		
-//		
-//		System.out.println(content.toString());
-//		System.out.println(keywords.toString());
-//		
-//		runMatches(keywords, "travel");
-//		runMatches(content, "are");
+
 	}
 
 	public static void
