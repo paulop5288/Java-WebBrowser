@@ -1,3 +1,5 @@
+// This file should be assessed for Stage 2
+
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,30 +17,20 @@ public class QueryBuilder {
 		// start parsing
 		// atomic query
 		if (!query.contains("(") && !query.contains(")")) {
-			if (checkRegularCharacter(query)) {
+			// form is already checked
 				return new AtomicQuery(query);
-			}
-			throw new BadQueryFormatException();
 		}
 		
 		// not query
 		if (query.startsWith("not")) {			
 			query = query.substring(query.indexOf("(") + 1, query.lastIndexOf(")")).trim();
-			if (checkRegularCharacter(query)) {
-				return new NotQuery(new AtomicQuery(query));
-			}
-			if (query.startsWith("not")) {
-				return new NotQuery(QueryBuilder.parse(query));
-			}
-			
-			throw new BadQueryFormatException();
+			return new NotQuery(QueryBuilder.parse(query));
 		}
 		
 		// and query
 		if (query.startsWith("and")) {
 			ArrayList<Query> andQuerys = new ArrayList<>();
-			query = query.replaceFirst("and", "").trim();
-			query = query.substring(1, query.length() - 1);
+			query = query.substring(query.indexOf("(") + 1, query.lastIndexOf(")")).trim();
 			String[] queryStrings = QueryBuilder.split(query);
 			for (String singleQuery : queryStrings) {
 				andQuerys.add(QueryBuilder.parse(singleQuery));
@@ -49,8 +41,7 @@ public class QueryBuilder {
 		// or query
 		if (query.startsWith("or")) {
 			ArrayList<Query> orQuerys = new ArrayList<>();
-			query = query.replaceFirst("or", "").trim();
-			query = query.substring(1, query.length() - 1);
+			query = query.substring(query.indexOf("(") + 1, query.lastIndexOf(")")).trim();
 			String[] queryStrings = QueryBuilder.split(query);
 			for (String singleQuery : queryStrings) {
 				orQuerys.add(QueryBuilder.parse(singleQuery));
@@ -60,10 +51,13 @@ public class QueryBuilder {
 		throw new BadQueryFormatException();
 	}
 	
+	// split prefix form
 	public static String[] split(String query) {
+		// split by ","
 		ArrayList<String> queryStrings = new ArrayList<>();
 		int bracketCount = 0;
 		int lastIndex = 0;
+		
 		for (int i = 0; i < query.length(); i++) {
 			char charCursor = query.charAt(i);
 			if (charCursor == ',' && bracketCount == 0) {
@@ -72,6 +66,7 @@ public class QueryBuilder {
 			} else if (i == query.length() - 1) {
 				queryStrings.add(query.substring(lastIndex, i + 1));
 			}
+			// "," inside an "( )" will be ignored
 			if (charCursor == '(') {
 				bracketCount++;
 			}
@@ -81,11 +76,15 @@ public class QueryBuilder {
 		}
 		return queryStrings.toArray(new String[queryStrings.size()]);
 	}
-	
+
+	// parse infix form
 	public static Query parseInfixForm(String query) throws BadQueryFormatException {
 		if (!checkInfixForm(query)) {
 			throw new BadQueryFormatException();
 		}
+		
+		// start parsing
+		// and query
 		if (query.contains(" and ")) {
 			String[] queryComponents = query.split(" and ");
 			ArrayList<Query> querys = new ArrayList<>();
@@ -94,9 +93,18 @@ public class QueryBuilder {
 			}
 			return new AndQuery(querys);
 		}
+		
+		// or query
 		if (query.contains(" or ")) {
-			// do something
+			String[] queryComponents = query.split(" or ");
+			ArrayList<Query> querys = new ArrayList<>();
+			for (String queryString : queryComponents) {
+				querys.add(parseInfixForm(queryString));
+			}
+			return new OrQuery(querys);
 		}
+		
+		// not query
 		if (query.contains("not ")) {
 			query = query.substring(4);
 			return new NotQuery(QueryBuilder.parseInfixForm(query));
@@ -104,11 +112,14 @@ public class QueryBuilder {
 		if (!checkRegularCharacter(query)) {
 			throw new BadQueryFormatException();
 		}
+		
+		// atomic query
 		return new AtomicQuery(query);
 	}
 	
 	// check regular format
 	public static boolean checkRegularForm(String query) throws BadQueryFormatException{
+		// check number of brackets
 		if (countOccurrences(query, '(') != countOccurrences(query, ')')) {
 			return false;
 		}
@@ -118,13 +129,12 @@ public class QueryBuilder {
 		return true;
 	}
 	
-	// check if a query contains regular characters only
+	// check if a query contains regular word only
 	public static boolean checkRegularCharacter(String query) {
 		// use regex to check
 		Pattern pattern = Pattern.compile("[\\W]");
 		Matcher matcher = pattern.matcher(query);
 		if (matcher.find()) {
-			//System.err.println(query + " is a wrong query.");
 			return false;
 		}
 		return true;
@@ -138,7 +148,6 @@ public class QueryBuilder {
 		if (query.contains(" or ") && query.contains(" and ")) {
 			return false;
 		}
-
 
 		// check if the query contains word and space only
 		Pattern pattern = Pattern.compile("[^a-zA-Z\\s]");
@@ -176,7 +185,6 @@ public class QueryBuilder {
 		try {
 			QueryBuilder.parseInfixForm(a);
 		} catch (Exception e) {
-			// TODO: handle exception
 			System.out.println(e);
 		}
 
@@ -184,7 +192,6 @@ public class QueryBuilder {
 		
 		long durantion = (endTime - startTime);
 		System.out.println("execution time is " + durantion / 1000000.0 + "ms");
-
 
 	}
 }

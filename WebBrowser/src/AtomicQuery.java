@@ -1,5 +1,6 @@
-import java.util.Set;
+// This file should be assessed for Stage 2
 
+import java.util.Set;
 
 
 public class AtomicQuery implements Query {

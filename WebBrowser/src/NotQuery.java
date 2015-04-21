@@ -1,3 +1,5 @@
+// This file should be assessed for Stage 2
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,9 +13,15 @@ public class NotQuery implements Query {
 
 	@Override
 	public Set<WebDoc> matches(WebIndex wind) {
+		
+		// allWebDocs is not modifiable
 		Set<WebDoc> allWebDocs = wind.getAllDocuments();
+		
+		// matched from subquery
 		Set<WebDoc> noWebDocs = query.matches(wind);
+		
 		Set<WebDoc> matchedWebDocs = new HashSet<>();
+		
 		for (WebDoc webDoc : allWebDocs) {
 			if (!noWebDocs.contains(webDoc)) {
 				matchedWebDocs.add(webDoc);

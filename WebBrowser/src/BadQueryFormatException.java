@@ -1,3 +1,4 @@
+// This file should be assessed for Stage 2
 
 public class BadQueryFormatException extends Exception {
 

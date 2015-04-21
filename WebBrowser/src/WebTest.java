@@ -1,3 +1,5 @@
+// This file comes from Stage 1
+
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -33,7 +35,7 @@ public class WebTest {
 		
 		for (String queryString : queryStrings) {
 			try {
-				Query query = QueryBuilder.parseInfixForm(queryString);
+				Query query = QueryBuilder.parse(queryString);
 				querys.add(query);
 				System.out.println(query);
 			} catch (Exception e) {
