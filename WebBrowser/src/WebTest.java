@@ -35,11 +35,11 @@ public class WebTest {
 		
 		for (String queryString : queryStrings) {
 			try {
-				Query query = QueryBuilder.parse(queryString);
+				Query query = QueryBuilder.parseInfixForm(queryString);
 				querys.add(query);
 				System.out.println(query);
 			} catch (Exception e) {
-				System.err.println("Query is not corrected.");
+				System.err.println(queryString + " : Query is not corrected.");
 			}
 		}
 		
