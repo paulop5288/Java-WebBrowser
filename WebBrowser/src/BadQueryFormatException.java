@@ -1,5 +1,4 @@
-// This file should be assessed for Stage 2
-
+// This file should NOT be assessed
 public class BadQueryFormatException extends Exception {
 
 	private static final long serialVersionUID = 1L;

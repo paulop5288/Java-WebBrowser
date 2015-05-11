@@ -1,4 +1,6 @@
 package deprecated;
+import WebDoc;
+
 import java.util.ArrayList;
 
 public class WebIndex {

@@ -1,86 +1,211 @@
-// This file comes from Stage 1
-
+// This file should NOT be assessed
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-
 public class WebDoc {
-
-	private String url;
-	private SortedSet<String> words;
+	private String url = null;
 	private SortedSet<String> keywords;
-	
-	public WebDoc(String the_url) {
-		url=the_url;
-		words = new TreeSet<String>();
-		keywords = new TreeSet<String>();
-		populate();
+	private SortedSet<String> content;
+	private SortedSet<String> allWords;
+	private String prefix = null;
+	private String fileName = null;
+
+	public WebDoc(String url) throws Exception {
+
+		url = url.replaceAll("(%20)+", " ");
+
+		if (url.startsWith("http")) {
+			this.prefix = "http:";
+		} else if (url.startsWith("file")) {
+			this.prefix = "file:";
+		}
+
+		// search file name
+		if (url.endsWith(".html")) {
+			int i = url.lastIndexOf("/");
+			this.fileName = url.substring(i + 1);
+		} else {
+			throw new Exception("This is not a html file.");
+		}
+
+		this.url = url;
+		this.keywords = new TreeSet<String>();
+		this.content = new TreeSet<String>();
+		this.allWords = new TreeSet<String>();
+		try {
+			extractWordsFromHTML();
+		} catch (Exception e) {
+			throw e;
+		}
+
+		allWords.addAll(keywords);
+		allWords.addAll(content);
+		if (this.allWords.isEmpty()) {
+			System.err.println("Empty File.");
+			throw new Exception("This page is empty.");
+		}
 	}
 
-	//this is a convenience to create a webdoc very quickly indeed.
-	public static WebDoc
-	getTestWebDoc(String the_url, String[] the_content_words, String[] the_keywords) {
-		WebDoc result = new WebDoc(the_url);
-		for (String word: the_content_words) {
-			result.words.add(word);
+	@Override
+	public String toString() {
+
+		try {
+			return this.prefix + this.fileName + " " + this.content.size()
+					+ " (" + this.allWords.first() + "-" + this.allWords.last()
+					+ ") " + this.keywords.size();
+		} catch (Exception e) {
+			System.err.println("Empty Webdoc");
 		}
-		for (String word: the_keywords) {
-			result.keywords.add(word);
-		}
-		return result;
+		return "Invalid WebDoc";
+
 	}
-	
-	public String getUrl() {
+
+	// accessors
+	public String getURL() {
 		return url;
 	}
 
 	public Set<String> getContent() {
-		return Collections.unmodifiableSet(words);
+		return Collections.unmodifiableSet(content);
 	}
 
 	public Set<String> getKeywords() {
 		return Collections.unmodifiableSet(keywords);
 	}
-	
-	public String
-	toString() {
-		StringBuffer buffer = new StringBuffer("file:");
-		buffer.append(url);
-		buffer.append(" ");
-		buffer.append(words.size());
-		buffer.append(" (");
-		buffer.append(words.first());
-		buffer.append("-");
-		buffer.append(words.last());
-		buffer.append(") ");
-		buffer.append(keywords.size());
-		return buffer.toString();
-		
+
+	public SortedSet<String> getAllWords() {
+		return allWords;
 	}
-	
-	//equals and hashcode - we could also check the contents of the sets, but to be honest
-	//the chances of the webpages changing whislt we're indexing probably makes that unneccessary.
-	
-	public boolean
-	equals(Object o) {
-		boolean result=false;
-		if (o!=null && o instanceof WebDoc) {
-			result=url.equals(((WebDoc)o).url);
+
+	public void printContentsWords() {
+		for (String word : content) {
+			System.out.println(word);
 		}
-		return result;
+		System.out.println(content.size());
 	}
-	
-	public int
-	hashCode() {
-		return url.hashCode();
+
+	public void printKeywords() {
+		for (String keyword : keywords) {
+			System.out.println(keyword);
+		}
+		System.out.println(keywords.size());
 	}
-	
-	//This is what you would need to implement and call for real if you were actually parsing.
-	public void
-	populate() {
-		
+
+	public void printAllwords() {
+		for (String word : allWords) {
+			System.out.println(word);
+		}
 	}
-	
+
+	// ----------------------------------------------------------------------------
+	// private methods
+
+	private void extractWordsFromHTML() throws Exception {
+		BufferedReader inputReader = null;
+		URL webURL = null;
+		URLConnection con = null;
+
+		try {
+			webURL = new URL(this.url);
+			con = webURL.openConnection();
+			inputReader = new BufferedReader(new InputStreamReader(
+					con.getInputStream()));
+			extractWordsFromBufferedReader(inputReader);
+		} catch (MalformedURLException e) {
+			System.err.println("This is not a correct URL.");
+			throw e;
+		} catch (FileNotFoundException e2) {
+			System.err.println("file not found.");
+			throw e2;
+		} catch (IOException e3) {
+			System.err.println("IO exception.");
+			throw e3;
+		} finally {
+			try {
+
+				if (inputReader != null) {
+					inputReader.close();
+				}
+			} catch (IOException e2) {
+				System.out.println("Fail to close file.");
+			}
+		}
+	}
+
+	private void extractWordsFromBufferedReader(BufferedReader inputReader)
+			throws IOException {
+
+		// read title
+		while (inputReader.ready()) {
+			String currentLine = inputReader.readLine();
+			System.out.println(currentLine);
+			if (currentLine.contains("<title>")) {
+				extractWordsFromString(currentLine, this.content);
+				while (inputReader.ready()) {
+					if (currentLine.contains("</title>")) {
+						break;
+					}
+					extractWordsFromString(inputReader.readLine(), this.content);
+				}
+				break;
+			}
+		}
+
+		// read keywords
+		while (inputReader.ready()) {
+			String currentLine = inputReader.readLine().toLowerCase();
+			if (currentLine.contains("<meta")) {
+				extractKeywordsFromString(currentLine, keywords);
+				while (inputReader.ready()) {
+					if (currentLine.contains(">")) {
+						break;
+					}
+					extractKeywordsFromString(inputReader.readLine(),
+							this.keywords);
+				}
+				break;
+			}
+			if (currentLine.contains("</head>")) {
+				break;
+			}
+		}
+
+		// read body
+		while (inputReader.ready()) {
+			extractWordsFromString(inputReader.readLine(), this.content);
+		}
+	}
+
+	private void extractWordsFromString(String currentLine,
+			Set<String> resultSet) {
+		currentLine = currentLine.trim().replaceAll("<[^<>]+>", "");
+		currentLine = currentLine.replaceAll("[^a-zA-Z ]+", "");
+
+		String[] words = currentLine.split(" ");
+		for (String word : words) {
+			if (word.compareTo("") != 0) {
+				resultSet.add(word.trim());
+			}
+		}
+	}
+
+	private void extractKeywordsFromString(String currentLine,
+			Set<String> resultSet) {
+		String tempString = currentLine.trim().replaceAll(".*content=\"", "");
+		tempString = tempString.replaceAll("name=\"keywords\"", "");
+		tempString = tempString.replaceAll("[<>\"]", "");
+		String[] keywords = tempString.split(",");
+		for (String keyword : keywords) {
+			resultSet.add(keyword.trim());
+		}
+	}
 }

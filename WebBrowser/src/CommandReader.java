@@ -1,5 +1,4 @@
-// This file comes from Stage 1
-
+// This file should NOT be assessed
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

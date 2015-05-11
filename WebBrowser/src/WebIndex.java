@@ -1,5 +1,4 @@
-// This file comes from Stage 1
-
+// This file should NOT be assessed
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,24 +9,19 @@ import java.util.Set;
 //It maintains a map of words to documents that contain those words.
 
 public class WebIndex {
-
-	private WebIndexType type;
 	private Set<WebDoc> documents;
 	private Map<String, Set<WebDoc>> index;
 
-	public WebIndex(WebIndexType the_type) {
-		type = the_type;
+	public WebIndex() {
 		documents = new HashSet<WebDoc>();
 		index = new HashMap<String, Set<WebDoc>>();
 	}
 
 	public void add(WebDoc the_doc) {
 		Set<String> words;
-		if (type == WebIndexType.KEYWORDS) {
-			words = the_doc.getKeywords();
-		} else {
-			words = the_doc.getContent();
-		}
+
+		words = the_doc.getAllWords();
+
 		if (words.isEmpty() == false) {
 			documents.add(the_doc);
 			for (String word : words) {
@@ -56,7 +50,6 @@ public class WebIndex {
 
 	public String toString() {
 		StringBuffer result = new StringBuffer("webindex over ");
-		result.append(type.getDescription());
 		result.append(" contains ");
 		result.append(index.keySet().size());
 		result.append(" words from ");
@@ -65,18 +58,4 @@ public class WebIndex {
 		return result.toString();
 	}
 
-}
-
-enum WebIndexType {
-	CONTENT("content"), KEYWORDS("keywords");
-
-	private String description;
-
-	WebIndexType(String the_description) {
-		description = the_description;
-	}
-
-	public String getDescription() {
-		return description;
-	}
 }

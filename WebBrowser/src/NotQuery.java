@@ -1,5 +1,4 @@
-// This file should be assessed for Stage 2
-
+// This file should NOT be assessed
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,9 +31,9 @@ public class NotQuery implements Query {
 	
 	@Override
 	public String toString() {
-		if (query instanceof NotQuery) {
-			return "NotQuery : [" + query + "]";
+		if (query instanceof AtomicQuery) {
+			return "NotQuery : " + ((AtomicQuery)query).getQueryString() ;
 		}
-		return "NotQuery : " + ((AtomicQuery)query).getQueryString() ;
+		return "NotQuery : [" + query + "]";
 	}
 }
