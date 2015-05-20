@@ -21,16 +21,16 @@ public class WebIndex {
 		Set<String> words;
 
 		words = the_doc.getAllWords();
-
+		System.out.println(words);
 		if (words.isEmpty() == false) {
 			documents.add(the_doc);
 			for (String word : words) {
-				if (index.containsKey(word)) {
-					index.get(word).add(the_doc);
+				if (index.containsKey(word.toLowerCase())) {
+					index.get(word.toLowerCase()).add(the_doc);
 				} else {
 					Set<WebDoc> docs = new HashSet<WebDoc>();
 					docs.add(the_doc);
-					index.put(word, docs);
+					index.put(word.toLowerCase(), docs);
 				}
 			}
 		}

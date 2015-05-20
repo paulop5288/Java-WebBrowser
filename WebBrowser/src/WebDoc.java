@@ -28,14 +28,15 @@ public class WebDoc {
 		} else if (url.startsWith("file")) {
 			this.prefix = "file:";
 		}
-
+		int i = url.lastIndexOf("/");
+		this.fileName = url.substring(i + 1);
 		// search file name
-		if (url.endsWith(".html")) {
-			int i = url.lastIndexOf("/");
-			this.fileName = url.substring(i + 1);
-		} else {
-			throw new Exception("This is not a html file.");
-		}
+//		if (url.endsWith(".html")) {
+//			int i = url.lastIndexOf("/");
+//			this.fileName = url.substring(i + 1);
+//		} else {
+//			throw new Exception("This is not a html file.");
+//		}
 
 		this.url = url;
 		this.keywords = new TreeSet<String>();
@@ -112,13 +113,10 @@ public class WebDoc {
 	private void extractWordsFromHTML() throws Exception {
 		BufferedReader inputReader = null;
 		URL webURL = null;
-		URLConnection con = null;
 
 		try {
 			webURL = new URL(this.url);
-			con = webURL.openConnection();
-			inputReader = new BufferedReader(new InputStreamReader(
-					con.getInputStream()));
+			inputReader = new BufferedReader(new InputStreamReader(webURL.openStream()));
 			extractWordsFromBufferedReader(inputReader);
 		} catch (MalformedURLException e) {
 			System.err.println("This is not a correct URL.");
@@ -147,7 +145,6 @@ public class WebDoc {
 		// read title
 		while (inputReader.ready()) {
 			String currentLine = inputReader.readLine();
-			System.out.println(currentLine);
 			if (currentLine.contains("<title>")) {
 				extractWordsFromString(currentLine, this.content);
 				while (inputReader.ready()) {

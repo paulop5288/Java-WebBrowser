@@ -22,9 +22,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 
-public class WebBrowserGUI extends JFrame {
+public class WebBrowserGUI extends JFrame implements HyperlinkListener{
 	/**
 	 * 
 	 */
@@ -64,7 +66,9 @@ public class WebBrowserGUI extends JFrame {
 
 		// editor pane
 		jEditorPane = new JEditorPane();
+		jEditorPane.setEditorKit(JEditorPane.createEditorKitForContentType("text/html"));
 		jEditorPane.setEditable(false);
+		jEditorPane.addHyperlinkListener(this);
 		
 		// history record
 		 historyRecord = new HistoryRecord();
@@ -180,6 +184,7 @@ public class WebBrowserGUI extends JFrame {
 				if (loaded) {
 					try {
 						this.webIndex.add(new WebDoc(urlString));
+						System.out.println(this.webIndex);
 					} catch (Exception e) {
 						System.err.println("failed to init webdoc");
 					}
@@ -209,8 +214,10 @@ public class WebBrowserGUI extends JFrame {
 				try {
 					resultJTextArea.removeAll();
 					Query query = QueryBuilder.parse(queryEntry.getText());
+					System.out.println(query);
 					Set<WebDoc> webDocs = query.matches(this.webIndex);
-					if (webDocs.size() == 0) {
+					System.out.println(webDocs);
+					if (webDocs.isEmpty()) {
 						this.resultJTextArea.add(new JLabel("No matched result."));
 						this.resultJTextArea.validate();
 					} else {
@@ -309,7 +316,7 @@ public class WebBrowserGUI extends JFrame {
 				try {
 					editorPane.setPage(label.getName());
 				} catch (IOException e1) {
-					editorPane.setText("Unable to dispaly the url page.");
+					editorPane.setText("Unable to display the url page.");
 				}
 			}
 			System.out.println("clicked.");
@@ -329,6 +336,39 @@ public class WebBrowserGUI extends JFrame {
 			}
 		});
 
+	}
+
+	@Override
+	public void hyperlinkUpdate(HyperlinkEvent e) {
+		// TODO Auto-generated method stub
+		boolean loaded = false;
+		String urlString = e.getURL().toString();
+		try {
+			if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+				jEditorPane.setPage(e.getURL());
+				this.historyRecord.getHistoryList().add(urlString);
+				this.historyRecord.setHistoryCursor(this.historyRecord.getHistoryList().size() - 1);
+				JLabel urlLabel = new JLabel(urlString);
+				
+				urlLabel.setFont(urlLabel.getFont().deriveFont(16.0f));
+				urlLabel.addMouseListener(new ClickAction(this));
+				urlLabel.setName(urlString);
+				this.historyRecord.add(urlLabel);
+				this.historyRecord.validate();
+				loaded = true;
+			}
+		} catch (Exception e2) {
+			jEditorPane.setText("Unable to display the url page.");
+			loaded = false;
+		}
+		if (loaded) {
+			try {
+				this.webIndex.add(new WebDoc(urlString));
+				System.out.println(this.webIndex);
+			} catch (Exception e1) {
+				System.err.println("failed to init webdoc");
+			}
+		}
 	}
 
 }
